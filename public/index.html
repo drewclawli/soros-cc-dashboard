@@ -1,23 +1,183 @@
-<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Soros Monitor</title>
-    <style>
-      body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width: 900px; margin: 40px auto; padding: 0 20px; background: #0b1020; color: #e8ecf3; }
-      .card { background: #121936; border: 1px solid #243057; border-radius: 16px; padding: 20px; margin: 16px 0; }
-      .muted { color: #aab4d0; }
-      code { background: #0f1630; padding: 2px 6px; border-radius: 6px; }
-      a { color: #8ab4ff; }
-    </style>
-  </head>
-  <body>
-    <h1>Soros Monitor</h1>
-    <div class="card">
-      <p>Read-only monitor scaffold is live.</p>
-      <p class="muted">Next step: wire live metrics from the local command center into this surface safely.</p>
-      <p>Health endpoint: <a href="/api/health">/api/health</a></p>
-    </div>
-  </body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Soros — Polymarket Monitor</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0b1020;color:#e8ecf3;min-height:100vh}
+.container{max-width:900px;margin:0 auto;padding:20px}
+h1{font-size:28px;margin-bottom:4px;color:#fff}
+.subtitle{color:#6b7394;font-size:14px;margin-bottom:24px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:20px}
+.card{background:#121936;border:1px solid #243057;border-radius:12px;padding:16px}
+.card h3{font-size:13px;color:#6b7394;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+.card .value{font-size:28px;font-weight:700}
+.card .value.green{color:#00d26a}
+.card .value.red{color:#ff4d4d}
+.card .value.yellow{color:#ffc107}
+.card .value.blue{color:#4dabf7}
+.table-card{background:#121936;border:1px solid #243057;border-radius:12px;padding:16px;margin-bottom:20px}
+table{width:100%;border-collapse:collapse}
+th{background:#0d1229;color:#6b7394;font-size:12px;text-transform:uppercase;letter-spacing:.5px;padding:10px;text-align:left}
+td{padding:10px;border-bottom:1px solid #1a2340;font-size:14px}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600}
+.tag-green{background:#00d26a20;color:#00d26a}
+.tag-red{background:#ff4d4d20;color:#ff4d4d}
+.tag-yellow{background:#ffc10720;color:#ffc107}
+.tag-blue{background:#4dabf720;color:#4dabf7}
+.tag-gray{background:#3a3f50;color:#8892b0}
+.live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#00d26a;margin-right:6px;animation:pulse 2s infinite}
+.live-dot.red{background:#ff4d4d;animation:none}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.section-title{font-size:18px;font-weight:600;margin:24px 0 12px;color:#fff}
+.note{color:#6b7394;font-size:13px;margin-top:16px}
+.config-table{font-size:13px}
+.config-table td{padding:6px 10px}
+.config-table tr:hover{background:#182038}
+.audit-log{max-height:200px;overflow-y:auto;background:#0d1229;border-radius:8px;padding:12px;font-family:monospace;font-size:12px;color:#8892b0;margin-top:12px}
+.audit-log div{padding:4px 0;border-bottom:1px solid #1a2340}
+.audit-log .ts{color:#4dabf7;margin-right:8px}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Soros — Polymarket Monitor</h1>
+  <div class="subtitle">
+    <span class="live-dot red"></span>
+    <span id="status-text">Loading…</span>
+  </div>
+
+  <div class="grid" id="kpis"></div>
+
+  <div class="section-title">Current Run</div>
+  <div class="card" id="run-card" style="display:none">
+    <table class="config-table">
+      <tr><td style="color:#6b7394">Run ID</td><td id="run-id">—</td></tr>
+      <tr><td style="color:#6b7394">Status</td><td id="run-status">—</td></tr>
+      <tr><td style="color:#6b7394">Started</td><td id="run-started">—</td></tr>
+      <tr><td style="color:#6b7394">P&L</td><td id="run-pnl">—</td></tr>
+      <tr><td style="color:#6b7394">Orders / Fills</td><td id="run-trades">—</td></tr>
+    </table>
+  </div>
+  <div class="note" id="no-run" style="display:none">No active run</div>
+
+  <div class="section-title">Active Config</div>
+  <div class="table-card" id="config-card"></div>
+
+  <div class="section-title">Recent Runs</div>
+  <div class="table-card">
+    <table>
+      <thead><tr><th>ID</th><th>Status</th><th>Mode</th><th>P&L</th><th>Orders</th><th>Started</th></tr></thead>
+      <tbody id="runs-body"></tbody>
+    </table>
+  </div>
+
+  <div class="section-title">Recent Trades</div>
+  <div class="table-card">
+    <table>
+      <thead><tr><th>ID</th><th>Asset</th><th>Side</th><th>Price</th><th>Size</th><th>Status</th><th>Time</th></tr></thead>
+      <tbody id="trades-body"></tbody>
+    </table>
+  </div>
+
+  <div class="note">Last updated: <span id="ts">—</span>. Data from Command Center snapshot.</div>
+</div>
+
+<script>
+// This page is static. The snapshot.json is deployed with the site.
+// To update: run the snapshot script locally and push to Vercel.
+// Future: poll /api/snapshot endpoint if the CC has a public URL.
+
+async function load() {
+  try {
+    const r = await fetch('/snapshot.json', {cache:'no-cache'});
+    if (!r.ok) { setStatus('error','No snapshot data'); return; }
+    const d = await r.json();
+    if (!d.ok) { setStatus('error','Snapshot invalid'); return; }
+    render(d);
+  } catch(e) { setStatus('error','Failed to load'); }
+}
+
+function setStatus(type, msg) {
+  const dot = document.querySelector('.live-dot');
+  dot.className = 'live-dot ' + (type==='ok' ? '' : 'red');
+  document.getElementById('status-text').textContent = msg;
+}
+
+function pnl(p) { return p >= 0 ? '+$'+p.toFixed(2) : '-$'+Math.abs(p).toFixed(2); }
+function pnlClass(p) { return p >= 0 ? 'green' : 'red'; }
+function tag(status) {
+  if (status === 'running') return '<span class="tag tag-green">Running</span>';
+  if (status === 'completed') return '<span class="tag tag-blue">Completed</span>';
+  if (status === 'stopped') return '<span class="tag tag-yellow">Stopped</span>';
+  return '<span class="tag tag-gray">'+status+'</span>';
+}
+
+function render(d) {
+  setStatus('ok','Connected');
+  document.getElementById('ts').textContent = d.ts || '—';
+
+  // KPIs
+  const run = d.current_run;
+  const totalPnl = run ? run.total_pnl : (d.totals ? d.totals.pnl_sum : 0);
+  const fills = run ? run.total_fills : (d.totals ? d.totals.fills_sum : 0);
+  const orders = run ? run.total_orders : (d.totals ? d.totals.orders_sum : 0);
+
+  document.getElementById('kpis').innerHTML = `
+    <div class="card"><h3>P&L</h3><div class="value ${pnlClass(totalPnl)}">${pnl(totalPnl)}</div></div>
+    <div class="card"><h3>Orders</h3><div class="value blue">${orders}</div></div>
+    <div class="card"><h3>Fills</h3><div class="value blue">${fills}</div></div>
+    <div class="card"><h3>Runs</h3><div class="value blue">${d.totals ? d.totals.run_count : 0}</div></div>
+  `;
+
+  // Current run
+  if (run) {
+    document.getElementById('run-card').style.display = '';
+    document.getElementById('no-run').style.display = 'none';
+    document.getElementById('run-id').textContent = '#' + run.id;
+    document.getElementById('run-status').innerHTML = tag(run.status);
+    document.getElementById('run-started').textContent = run.started_at || '—';
+    document.getElementById('run-pnl').innerHTML = '<span class="'+pnlClass(run.total_pnl)+'">'+pnl(run.total_pnl)+'</span>';
+    document.getElementById('run-trades').textContent = run.total_orders + ' / ' + run.total_fills;
+  } else {
+    document.getElementById('run-card').style.display = 'none';
+    document.getElementById('no-run').style.display = '';
+  }
+
+  // Config
+  const cfg = d.config || {};
+  let html = '<table class="config-table">';
+  for (const [k,v] of Object.entries(cfg).sort()) {
+    if (k === 'notes') continue;
+    html += '<tr><td style="color:#6b7394;width:200px">'+k+'</td><td>'+JSON.stringify(v)+'</td></tr>';
+  }
+  html += '</table>';
+  if (cfg.notes) html += '<div class="note" style="margin-top:8px">📝 '+cfg.notes+'</div>';
+  document.getElementById('config-card').innerHTML = html;
+
+  // Recent runs
+  const runs = d.recent_runs || d.runs || [];
+  let rhtml = '';
+  for (const r of runs.slice(0,10)) {
+    rhtml += '<tr><td>#'+r.id+'</td><td>'+tag(r.status)+'</td><td>'+r.mode+'</td><td class="'+pnlClass(r.total_pnl)+'">'+pnl(r.total_pnl)+'</td><td>'+r.total_orders+'/'+r.total_fills+'</td><td>'+(r.started_at||'').slice(5,16)+'</td></tr>';
+  }
+  document.getElementById('runs-body').innerHTML = rhtml || '<tr><td colspan="6" style="color:#6b7394">No runs yet</td></tr>';
+
+  // Recent trades
+  const trades = d.recent_trades || [];
+  let thtml = '';
+  for (const t of trades.slice(0,10)) {
+    const side = t.side === 'buy' ? '<span class="tag tag-green">BUY</span>' : '<span class="tag tag-red">SELL</span>';
+    thtml += '<tr><td>'+t.id+'</td><td>'+t.asset+'</td><td>'+side+'</td><td>$'+(t.price||0).toFixed(2)+'</td><td>'+(t.size||0).toFixed(1)+'</td><td>'+(t.status||'—')+'</td><td>'+(t.created_at||'').slice(5,16)+'</td></tr>';
+  }
+  document.getElementById('trades-body').innerHTML = thtml || '<tr><td colspan="7" style="color:#6b7394">No trades yet</td></tr>';
+}
+
+load();
+// Auto-refresh every 60s
+setInterval(load, 60000);
+</script>
+</body>
 </html>
