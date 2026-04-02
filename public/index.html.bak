@@ -77,7 +77,7 @@ const tag = s => s === 'running' ? '<span class="tag tg">Running</span>' : s ===
 
 async function load() {
   try {
-    const r = await fetch('/api/snapshot', {cache:'no-cache'});
+    const r = await fetch('/snapshot.json', {cache:'no-cache'});
     if (!r.ok) { setStatus('err','No data'); return; }
     const d = await r.json();
     if (!d.ok) { setStatus('err','Invalid'); return; }
