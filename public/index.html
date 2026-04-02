@@ -42,6 +42,10 @@ td{padding:6px;border-bottom:1px solid #1a2340;font-size:12px}
 
 <div class="p"><h2>Performance</h2><table class="t"><tbody id="perf"></tbody></table></div>
 
+<div class="p"><h2>Pair Lifecycle</h2><table class="t"><tbody id="pairlife"></tbody></table></div>
+
+<div class="p"><h2>Merge & Hedge Ops</h2><table class="t"><tbody id="ops"></tbody></table></div>
+
 <div class="p"><h2>Recent Events</h2><div class="lb" id="ev"></div></div>
 
 <div class="p"><h2>Active Config</h2><table class="t"><tbody id="cf"></tbody></table></div>
@@ -159,6 +163,24 @@ function render(d){
   <div class="k"><h3>Pair OK</h3><div class="v bl">${met.pairOks}</div></div>
   <div class="k"><h3>Avg Sprd</h3><div class="v bl">${met.avgSpread.toFixed(3)}</div></div>
   <div class="k"><h3>Mid Filter</h3><div class="v yl">${met.midpointFills}</div></div>
+  `;
+
+  const pm = bot.pair_metrics||{};
+  const hm = bot.hedge_metrics||{};
+  const mm = bot.merge_metrics||{};
+  const totalOutcomes = (pm.paired||0)+(pm.merge||0)+(pm.orphan||0)+(pm.hedged||0);
+  $('pairlife').innerHTML = `
+    <tr><td style="color:#6b7394">Paired</td><td>${pm.paired||0}</td><td>${totalOutcomes?((pm.paired||0)/totalOutcomes*100).toFixed(1):0}%</td></tr>
+    <tr><td style="color:#6b7394">Merged</td><td>${pm.merge||0}</td><td>${totalOutcomes?((pm.merge||0)/totalOutcomes*100).toFixed(1):0}%</td></tr>
+    <tr><td style="color:#6b7394">Hedged</td><td>${pm.hedged||0}</td><td>${totalOutcomes?((pm.hedged||0)/totalOutcomes*100).toFixed(1):0}%</td></tr>
+    <tr><td style="color:#6b7394">Orphan</td><td>${pm.orphan||0}</td><td>${totalOutcomes?((pm.orphan||0)/totalOutcomes*100).toFixed(1):0}%</td></tr>
+  `;
+  $('ops').innerHTML = `
+    <tr><td style="color:#6b7394">Hedge queued</td><td>${hm.queued||0}</td></tr>
+    <tr><td style="color:#6b7394">Hedge completed</td><td>${hm.completed||0}</td></tr>
+    <tr><td style="color:#6b7394">Merge OK</td><td>${mm.ok||0}</td></tr>
+    <tr><td style="color:#6b7394">Merge fail</td><td>${mm.fail||0}</td></tr>
+    <tr><td style="color:#6b7394">Merge success %</td><td>${(mm.ok||0)+(mm.fail||0)?((mm.ok||0)/((mm.ok||0)+(mm.fail||0))*100).toFixed(1):0}%</td></tr>
   `;
 
   // Run
