@@ -7,164 +7,211 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0b1020;color:#e8ecf3;min-height:100vh}
-.container{max-width:960px;margin:0 auto;padding:20px}
-h1{font-size:24px;margin-bottom:2px;color:#fff}
-.subtitle{color:#6b7394;font-size:13px;margin-bottom:20px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:16px}
-.card{background:#121936;border:1px solid #243057;border-radius:10px;padding:14px}
-.card h3{font-size:11px;color:#6b7394;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
-.card .val{font-size:24px;font-weight:700}
-.green{color:#00d26a}.red{color:#ff4d4d}.blue{color:#4dabf7}.yellow{color:#ffc107}
-.panel{background:#121936;border:1px solid #243057;border-radius:10px;padding:14px;margin-bottom:14px}
-.panel h2{font-size:14px;color:#6b7394;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
-table{width:100%;border-collapse:collapse}
-th{background:#0d1229;color:#6b7394;font-size:11px;text-transform:uppercase;letter-spacing:.4px;padding:8px;text-align:left}
-td{padding:8px;border-bottom:1px solid #1a2340;font-size:13px}
-.tag{display:inline-block;padding:1px 6px;border-radius:3px;font-size:11px;font-weight:600}
-.tg{background:#00d26a20;color:#00d26a}
-.tr{background:#ff4d4d20;color:#ff4d4d}
-.tb{background:#4dabf720;color:#4dabf7}
-.ty{background:#ffc10720;color:#ffc107}
-.note{color:#6b7394;font-size:12px;margin-top:12px}
-.live{display:inline-block;width:7px;height:7px;border-radius:50%;background:#00d26a;margin-right:5px;animation:pu 2s infinite}
-.live.off{background:#ff4d4d;animation:none}
+.c{max-width:1100px;margin:0 auto;padding:20px}
+h1{font-size:22px;margin-bottom:2px}.sub{color:#6b7394;font-size:12px;margin-bottom:16px}
+.live{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px}
+.live.on{background:#00d26a;animation:pu 2s infinite}.live.off{background:#ff4d4d;animation:none}
 @keyframes pu{0%,100%{opacity:1}50%{opacity:.4}}
-.logbox{background:#0d1229;border-radius:6px;padding:10px;font-family:monospace;font-size:11px;color:#8892b0;max-height:160px;overflow-y:auto;margin-top:8px}
-.logbox div{padding:3px 0;border-bottom:1px solid #1a2340}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.k{background:#121936;border:1px solid #243057;border-radius:10px;padding:12px}
+.k h3{font-size:10px;color:#6b7394;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px}
+.k .v{font-size:22px;font-weight:700}
+.gn{color:#00d26a}.rd{color:#ff4d4d}.bl{color:#4dabf7}.yl{color:#ffc107}
+.p{background:#121936;border:1px solid #243057;border-radius:10px;padding:14px;margin-bottom:12px}
+.p h2{font-size:13px;color:#6b7394;text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px}
+.t{width:100%;border-collapse:collapse}
+th{background:#0d1229;color:#6b7394;font-size:10px;text-transform:uppercase;letter-spacing:.4px;padding:6px;text-align:left}
+td{padding:6px;border-bottom:1px solid #1a2340;font-size:12px}
+.tg{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600}
+.tgg{background:#00d26a20;color:#00d26a}.tgr{background:#ff4d4d20;color:#ff4d4d}.tgb{background:#4dabf720;color:#4dabf7}.tgy{background:#ffc10720;color:#ffc107}
+.lb{background:#0d1229;border-radius:6px;padding:8px;font-family:monospace;font-size:11px;color:#8892b0;max-height:140px;overflow-y:auto;margin-top:6px}
+.lb div{padding:2px 0;border-bottom:1px solid #1a2340}
+.n{color:#6b7394;font-size:11px;margin-top:10px}
 </style>
 </head>
 <body>
-<div class="container">
-  <h1>Soros — Polymarket Monitor</h1>
-  <div class="subtitle"><span class="live off" id="dot"></span><span id="status">Loading…</span></div>
+<div class="c">
+<h1>Soros — Polymarket Live Monitor</h1>
+<div class="sub"><span class="live off" id="dot"></span><span id="st">Loading…</span></div>
 
-  <div class="grid" id="kpis"></div>
+<div class="g" id="kpis"></div>
 
-  <div class="panel">
-    <h2>Current Run</h2>
-    <table><tbody id="run-body"></tbody></table>
-    <div id="no-run" style="display:none;color:#6b7394">No active run</div>
-  </div>
+<div class="g" id="perf"></div>
 
-  <div class="panel">
-    <h2>Bot Live Status</h2>
-    <div class="logbox" id="bot-logs"></div>
-  </div>
+<div class="p"><h2>Current Run</h2><table class="t"><tbody id="rb"></tbody></table></div>
 
-  <div class="panel">
-    <h2>Active Config</h2>
-    <table><tbody id="cfg-body"></tbody></table>
-  </div>
+<div class="p"><h2>Performance</h2><table class="t"><tbody id="perf"></tbody></table></div>
 
-  <div class="panel">
-    <h2>Recent Runs</h2>
-    <table><thead><tr><th>ID</th><th>Status</th><th>P&L</th><th>Orders</th><th>Fills</th><th>Started</th></tr></thead><tbody id="runs-body"></tbody></table>
-  </div>
+<div class="p"><h2>Recent Events</h2><div class="lb" id="ev"></div></div>
 
-  <div class="panel">
-    <h2>Recent Trades</h2>
-    <table><thead><tr><th>ID</th><th>Asset</th><th>Side</th><th>Price</th><th>Size</th><th>Status</th><th>Time</th></tr></thead><tbody id="trades-body"></tbody></table>
-  </div>
+<div class="p"><h2>Active Config</h2><table class="t"><tbody id="cf"></tbody></table></div>
 
-  <div class="note">Auto-refresh: 60s. Last: <span id="ts">—</span></div>
+<div class="p"><h2>Recent Runs</h2><table class="t"><thead><tr><th>ID</th><th>Status</th><th>P&L</th><th>Orders</th><th>Fills</th><th>Started</th></tr></thead><tbody id="rn"></tbody></table></div>
+
+<div class="p"><h2>Recent Trades</h2><table class="t"><thead><tr><th>ID</th><th>Asset</th><th>Side</th><th>Price</th><th>Size</th><th>Status</th><th>Time</th></tr></thead><tbody id="tr"></tbody></table></div>
+
+<div class="n">Auto-refresh 60s. Last: <span id="ts">—</span></div>
 </div>
-
 <script>
-const $ = id => document.getElementById(id);
-const pnl = p => p >= 0 ? '+$'+p.toFixed(2) : '-$'+Math.abs(p).toFixed(2);
-const pnlC = p => p >= 0 ? 'green' : 'red';
-const tag = s => s === 'running' ? '<span class="tag tg">Running</span>' : s === 'stopped' ? '<span class="tag ty">Stopped</span>' : '<span class="tag tb">Completed</span>';
+const $=id=>document.getElementById(id);
+const pnl=p=>p>=0?'+$'+p.toFixed(2):'-$'+Math.abs(p).toFixed(2);
+const pnlC=p=>p>=0?'gn':'rd';
+const tag=s=>s==='running'?'<span class="tg tgg">Running</span>':s==='stopped'?'<span class="tg tgy">Stopped</span>':'<span class="tg tgb">Done</span>';
 
-async function load() {
-  try {
-    const r = await fetch('/api/snapshot', {cache:'no-cache'});
-    if (!r.ok) { setStatus('err','No data'); return; }
-    const d = await r.json();
-    if (!d.ok) { setStatus('err','Invalid'); return; }
+function setStatus(t,m){$('dot').className='live '+(t==='ok'?'on':'off');$('st').textContent=m}
+
+function extractBotMetrics(logLines){
+  // Parse the bot's last 200 lines for metrics
+  const m = {fills:0,wsRecoveries:0,merges:0,claims:0,orphans:0,hedges:0,pnlLine:'',cycleLine:'',lastFill:'',lastMerge:'',lastClaim:'',lastError:'',lossState:''};
+  for(const l of logLines){
+    if(!l) continue;
+    // Counts
+    if(l.includes('FILL [WS]')) m.fills++;
+    if(l.includes('FILL [WS-RECOVERED]')) m.wsRecoveries++;
+    if(l.includes('MERGED OK')) m.merges++;
+    if(l.includes('CLAIMED') || l.includes('Auto-claimed')) m.claims++;
+    if(l.includes('ORPHAN CANCEL')) m.orphans++;
+    if(l.includes('hedges completed')) m.hedges++;
+    // State
+    if(l.includes('Wallet Δ')) m.pnlLine = l.trim();
+    if(l.includes('Est Total P&L')) m.pnlLine = l.trim();
+    if(l.includes('Ord:') && l.includes('Exp:')) m.cycleLine = l.trim();
+    if(l.includes('FILL') && !m.lastFill) m.lastFill = l.trim();
+    if(l.includes('MERGED OK') && !m.lastMerge) m.lastMerge = l.trim();
+    if(l.includes('CLAIMED') && !m.lastClaim) m.lastClaim = l.trim();
+    if(l.includes('ERROR') && !m.lastError) m.lastError = l.trim();
+    if(l.includes('LOSS STOP') || l.includes('LOSS COOLOFF')) m.lossState = l.trim();
+  }
+  return m;
+}
+
+function extractHedge(logLines){
+  const h = {t1:0,t2:0,t3:0,t4:0,complete:0,cancel:0,skip:0};
+  for(const l of logLines){
+    if(!l) continue;
+    if(l.includes('HEDGE WAIT T1')) h.t1++;
+    if(l.includes('HEDGE WAIT T2')) h.t2++;
+    if(l.includes('HEDGE WAIT T3')) h.t3++;
+    if(l.includes('HEDGE WAIT T4')) h.t4++;
+    if(l.includes('HEDGE COMPLETE')) h.complete++;
+    if(l.includes('HEDGE CANCEL')) h.cancel++;
+    if(l.includes('HEDGE SKIP')) h.skip++;
+  }
+  return h;
+}
+
+function extractMetrics(logLines){
+  const m = {avgSpread:0,spreads:[],pairOks:0,midpointFills:0,rejects:0};
+  for(const l of logLines){
+    if(!l) continue;
+    if(l.includes('PAIR OK')) m.pairOks++;
+    if(l.includes('MIDPOINT FILTER')) m.midpointFills++;
+    if(l.includes('REJECT')) m.rejects++;
+    const sm = l.match(/final_d=([0-9.]+)/);
+    if(sm) m.spreads.push(parseFloat(sm[1]));
+  }
+  if(m.spreads.length) m.avgSpread = m.spreads.reduce((a,b)=>a+b)/m.spreads.length;
+  return m;
+}
+
+async function load(){
+  try{
+    const r=await fetch('/api/snapshot',{cache:'no-cache'});
+    if(!r.ok){setStatus('err','No data');return}
+    const d=await r.json();
+    if(!d.ok){setStatus('err','Invalid');return}
     render(d);
-  } catch(e) { setStatus('err','Load failed: '+e.message); }
+  }catch(e){setStatus('err','Load failed: '+e.message)}
 }
 
-function setStatus(t,m) {
-  $('dot').className = 'live ' + (t==='ok' ? '' : 'off');
-  $('status').textContent = m;
-}
-
-function render(d) {
+function render(d){
   setStatus('ok','Connected');
-  $('ts').textContent = d.ts || '—';
+  $('ts').textContent=d.ts||'—';
+  const run=d.current_run||{};
+  const bot=d.bot||{};
+  const cfg=d.config||{};
+  const b=extractBotMetrics((bot.events||[]).concat([bot.pnlLine,bot.cycleLine,bot.lastFill,bot.lastMerge,bot.lastClaim,bot.lastError,bot.lossState]).filter(Boolean));
+  const h=extractHedge((bot.events||[]).concat([bot.lossState]).filter(Boolean));
+  const met=extractMetrics((bot.events||[]).filter(Boolean));
 
-  const run = d.current_run;
-  const bot = d.bot || {};
-  const cfg = d.config || {};
-  const pnlVal = run ? run.total_pnl : 0;
-  const fills = run ? run.total_fills : 0;
-  const orders = run ? run.total_orders : 0;
+  // KPIs
+  $('kpis').innerHTML=`
+  <div class="k"><h3>Wallet</h3><div class="v bl">$${(run.wallet_balance||0).toFixed(0)}</div></div>
+  <div class="k"><h3>Orders</h3><div class="v bl">${run.total_orders||0}</div></div>
+  <div class="k"><h3>Fills</h3><div class="v bl">${run.total_fills||0}</div></div>
+  <div class="k"><h3>Fills/Orders</h3><div class="v bl">${run.total_orders?(run.total_fills/run.total_orders*100).toFixed(0):0}%</div></div>
+  <div class="k"><h3>Bot</h3><div class="v ${bot.alive?'gn':'rd'}">${bot.alive?'ALIVE':'DOWN'}</div></div>
+  <div class="k"><h3>Pause</h3><div class="v ${cfg.pauseOrders?'yl':'gn'}">${cfg.pauseOrders?'PAUSED':'ON'}</div></div>
+  `;
 
-  $('kpis').innerHTML = `
-    <div class="card"><h3>P&L</h3><div class="val ${pnlC(pnlVal)}">${pnl(pnlVal)}</div></div>
-    <div class="card"><h3>Orders</h3><div class="val blue">${orders}</div></div>
-    <div class="card"><h3>Fills</h3><div class="val blue">${fills}</div></div>
-    <div class="card"><h3>Runs</h3><div class="val blue">${d.totals ? d.totals.run_count : 0}</div></div>
-    <div class="card"><h3>Bot</h3><div class="val ${bot.alive ? 'green' : 'red'}">${bot.alive ? 'ALIVE' : 'DOWN'}</div></div>
-    <div class="card"><h3>Pause</h3><div class="val ${cfg.pauseOrders ? 'yellow' : 'green'}">${cfg.pauseOrders ? 'PAUSED' : 'ON'}</div></div>
+  // Performance
+  $('perf').innerHTML=`
+  <div class="k"><h3>WS Fills</h3><div class="v bl">${b.fills}</div></div>
+  <div class="k"><h3>WS-Recov</h3><div class="v yl">${b.wsRecoveries}</div></div>
+  <div class="k"><h3>Merges</h3><div class="v gn">${b.merges}</div></div>
+  <div class="k"><h3>Claims</h3><div class="v gn">${b.claims}</div></div>
+  <div class="k"><h3>Orphans</h3><div class="v rd">${b.orphans}</div></div>
+  <div class="k"><h3>Hedges</h3><div class="v gn">${h.complete}</div></div>
+  <div class="k"><h3>Hedge T1</h3><div class="v bl">${h.t1}</div></div>
+  <div class="k"><h3>Hedge T2</h3><div class="v bl">${h.t2}</div></div>
+  <div class="k"><h3>Hedge T3</h3><div class="v bl">${h.t3}</div></div>
+  <div class="k"><h3>Hedge T4</h3><div class="v yl">${h.t4}</div></div>
+  <div class="k"><h3>Pair OK</h3><div class="v bl">${met.pairOks}</div></div>
+  <div class="k"><h3>Avg Sprd</h3><div class="v bl">${met.avgSpread.toFixed(3)}</div></div>
+  <div class="k"><h3>Mid Filter</h3><div class="v yl">${met.midpointFills}</div></div>
   `;
 
   // Run
-  if (run) {
-    $('no-run').style.display = 'none';
-    $('run-body').innerHTML = `
-      <tr><td style="color:#6b7394">ID</td><td>#${run.id}</td></tr>
-      <tr><td style="color:#6b7394">Status</td><td>${tag(run.status)}</td></tr>
-      <tr><td style="color:#6b7394">Mode</td><td>${run.mode}</td></tr>
-      <tr><td style="color:#6b7394">Started</td><td>${run.started_at || '—'}</td></tr>
-      <tr><td style="color:#6b7394">P&L</td><td><span class="${pnlC(run.total_pnl)}">${pnl(run.total_pnl)}</span></td></tr>
-      <tr><td style="color:#6b7394">Orders / Fills</td><td>${run.total_orders} / ${run.total_fills}</td></tr>
-      <tr><td style="color:#6b7394">Cycles</td><td>${run.total_cycles}</td></tr>
+  if(run.id){
+    $('rb').innerHTML=`
+    <tr><td style="color:#6b7394">ID</td><td>#${run.id}</td></tr>
+    <tr><td style="color:#6b7394">Status</td><td>${tag(run.status)}</td></tr>
+    <tr><td style="color:#6b7394">Started</td><td>${(run.started_at||'').slice(0,16)}</td></tr>
+    <tr><td style="color:#6b7394">P&L</td><td class="${pnlC(run.total_pnl)}">${pnl(run.total_pnl)}</td></tr>
+    <tr><td style="color:#6b7394">Orders/Fills</td><td>${run.total_orders}/${run.total_fills}</td></tr>
+    <tr><td style="color:#6b7394">Cycles</td><td>${run.total_cycles}</td></tr>
+    <tr><td style="color:#6b7394">Win/Loss</td><td>${run.win_count}/${run.loss_count}</td></tr>
     `;
-  } else {
-    $('run-body').innerHTML = '';
-    $('no-run').style.display = '';
   }
 
-  // Bot logs
-  const logs = [];
-  if (bot.pnl_line) logs.push('📊 ' + bot.pnl_line.replace(/^\d+:\d+:\d+\s*\[INFO\]\s*/,''));
-  if (bot.cycle_line) logs.push('⏱️ ' + bot.cycle_line.replace(/^\d+:\d+:\d+\s*\[INFO\]\s*/,''));
-  if (bot.last_fill) logs.push('✅ ' + bot.last_fill.replace(/^\d+:\d+:\d+\s*\[INFO\]\s*/,''));
-  if (bot.last_merge) logs.push('🔀 ' + bot.last_merge.replace(/^\d+:\d+:\d+\s*\[INFO\]\s*/,''));
-  if (bot.last_claim) logs.push('💰 ' + bot.last_claim.replace(/^\d+:\d+:\d+\s*\[INFO\]\s*/,''));
-  if (bot.last_error) logs.push('❌ ' + bot.last_error.replace(/^\d+:\d+:\d+\s*\[ERROR\]\s*/,''));
-  if (bot.loss_state) logs.push('⚠️ ' + bot.loss_state.replace(/^\d+:\d+:\d+\s*\[WARNING\]\s*/,''));
-  $('bot-logs').innerHTML = logs.length ? logs.map(l => '<div>'+l+'</div>').join('') : '<div style="color:#6b7394">No live data yet</div>';
+  // Events
+  const evts=[];
+  if(b.pnlLine) evts.push('📊 '+b.pnlLine.replace(/^\d+:\d+:\d+\s*\[INFO\]\s*/,''));
+  if(b.cycleLine) evts.push('⏱️ '+b.cycleLine.replace(/^\d+:\d+:\d+\s*\[INFO\]\s*/,''));
+  if(b.lastFill) evts.push('✅ '+b.lastFill.replace(/^\d+:\d+:\d+\s*\[INFO\]\s*/,''));
+  if(b.lastMerge) evts.push('🔀 '+b.lastMerge.replace(/^\d+:\d+:\d+\s*\[INFO\]\s*/,''));
+  if(b.lastClaim) evts.push('💰 '+b.lastClaim.replace(/^\d+:\d+:\d+\s*\[INFO\]\s*/,''));
+  if(b.lastError) evts.push('❌ '+b.lastError.replace(/^\d+:\d+:\d+\s*\[ERROR\]\s*/,''));
+  if(b.lossState) evts.push('⚠️ '+b.lossState.replace(/^\d+:\d+:\d+\s*\[WARNING\]\s*/,''));
+  $('ev').innerHTML=evts.length?evts.map(e=>'<div>'+e+'</div>').join(''):'<div style="color:#6b7394">No events yet</div>';
 
   // Config
-  let ch = '';
-  for (const [k,v] of Object.entries(cfg).sort()) {
-    if (k === 'notes') continue;
-    ch += `<tr><td style="color:#6b7394;width:180px">${k}</td><td>${JSON.stringify(v)}</td></tr>`;
+  let ch='';
+  for(const[k,v] of Object.entries(cfg).sort()){
+    if(k==='notes') continue;
+    ch+=`<tr><td style="color:#6b7394;width:160px">${k}</td><td>${JSON.stringify(v)}</td></tr>`;
   }
-  if (cfg.notes) ch += `<tr><td style="color:#6b7394">Notes</td><td>${cfg.notes}</td></tr>`;
-  $('cfg-body').innerHTML = ch;
+  if(cfg.notes) ch+=`<tr><td style="color:#6b7394">Notes</td><td>${cfg.notes}</td></tr>`;
+  $('cf').innerHTML=ch;
 
   // Runs
-  let rh = '';
-  for (const r of (d.recent_runs || []).slice(0,10)) {
-    rh += `<tr><td>#${r.id}</td><td>${tag(r.status)}</td><td class="${pnlC(r.total_pnl)}">${pnl(r.total_pnl)}</td><td>${r.total_orders}</td><td>${r.total_fills}</td><td>${(r.started_at||'').slice(5,16)}</td></tr>`;
+  let rh='';
+  for(const r of (d.recent_runs||[]).slice(0,10)){
+    rh+=`<tr><td>#${r.id}</td><td>${tag(r.status)}</td><td class="${pnlC(r.total_pnl)}">${pnl(r.total_pnl)}</td><td>${r.total_orders}</td><td>${r.total_fills}</td><td>${(r.started_at||'').slice(5,16)}</td></tr>`;
   }
-  $('runs-body').innerHTML = rh || '<tr><td colspan="6" style="color:#6b7394">No runs</td></tr>';
+  $('rn').innerHTML=rh||'<tr><td colspan="6" style="color:#6b7394">No runs</td></tr>';
 
   // Trades
-  let th = '';
-  for (const t of (d.recent_trades || []).slice(0,10)) {
-    const s = t.side === 'buy' ? '<span class="tag tg">BUY</span>' : '<span class="tag tr">SELL</span>';
-    th += `<tr><td>${t.id}</td><td>${t.asset}</td><td>${s}</td><td>$${(t.price||0).toFixed(2)}</td><td>${(t.size||0).toFixed(1)}</td><td>${t.status||'—'}</td><td>${(t.created_at||'').slice(5,16)}</td></tr>`;
+  let th='';
+  for(const t of (d.recent_trades||[]).slice(0,10)){
+    const s=t.side==='buy'?'<span class="tg tgg">BUY</span>':'<span class="tg tgr">SELL</span>';
+    th+=`<tr><td>${t.id}</td><td>${t.asset}</td><td>${s}</td><td>$${(t.price||0).toFixed(2)}</td><td>${(t.size||0).toFixed(1)}</td><td>${t.status||'—'}</td><td>${(t.created_at||'').slice(5,16)}</td></tr>`;
   }
-  $('trades-body').innerHTML = th || '<tr><td colspan="7" style="color:#6b7394">No trades</td></tr>';
+  $('tr').innerHTML=th||'<tr><td colspan="7" style="color:#6b7394">No trades</td></tr>';
 }
 
 load();
-setInterval(load, 60000);
+setInterval(load,60000);
 </script>
 </body>
 </html>
