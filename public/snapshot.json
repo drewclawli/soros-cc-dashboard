@@ -1,0 +1,27 @@
+{
+  "ok": true,
+  "ts": "2026-03-31T13:48:29.494898Z",
+  "monitor": "soros",
+  "run": null,
+  "config": {
+    "targetAssets": "BTC,ETH",
+    "windowDurations": [
+      "5m"
+    ],
+    "kellyBankroll": 100,
+    "sessionBudget": 100,
+    "budgetPerMarket": 10,
+    "mmSpreadMin": 0.035,
+    "mmOrderSize": 5,
+    "maxLossPct": 0.2,
+    "maxConcurrentWindows": 5,
+    "simFillRate": 0.7,
+    "tradeAdvanceWindows": false,
+    "mode": "dry_run"
+  },
+  "latestLog": "bot/logs/bot_v15_1_20260331_134821.log",
+  "recentErrors": [],
+  "highlights": [
+    "21:48:22 [INFO]   Mode: LIVE"
+  ]
+}
