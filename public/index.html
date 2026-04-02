@@ -7,176 +7,163 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0b1020;color:#e8ecf3;min-height:100vh}
-.container{max-width:900px;margin:0 auto;padding:20px}
-h1{font-size:28px;margin-bottom:4px;color:#fff}
-.subtitle{color:#6b7394;font-size:14px;margin-bottom:24px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:20px}
-.card{background:#121936;border:1px solid #243057;border-radius:12px;padding:16px}
-.card h3{font-size:13px;color:#6b7394;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
-.card .value{font-size:28px;font-weight:700}
-.card .value.green{color:#00d26a}
-.card .value.red{color:#ff4d4d}
-.card .value.yellow{color:#ffc107}
-.card .value.blue{color:#4dabf7}
-.table-card{background:#121936;border:1px solid #243057;border-radius:12px;padding:16px;margin-bottom:20px}
+.container{max-width:960px;margin:0 auto;padding:20px}
+h1{font-size:24px;margin-bottom:2px;color:#fff}
+.subtitle{color:#6b7394;font-size:13px;margin-bottom:20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:16px}
+.card{background:#121936;border:1px solid #243057;border-radius:10px;padding:14px}
+.card h3{font-size:11px;color:#6b7394;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.card .val{font-size:24px;font-weight:700}
+.green{color:#00d26a}.red{color:#ff4d4d}.blue{color:#4dabf7}.yellow{color:#ffc107}
+.panel{background:#121936;border:1px solid #243057;border-radius:10px;padding:14px;margin-bottom:14px}
+.panel h2{font-size:14px;color:#6b7394;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
 table{width:100%;border-collapse:collapse}
-th{background:#0d1229;color:#6b7394;font-size:12px;text-transform:uppercase;letter-spacing:.5px;padding:10px;text-align:left}
-td{padding:10px;border-bottom:1px solid #1a2340;font-size:14px}
-.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600}
-.tag-green{background:#00d26a20;color:#00d26a}
-.tag-red{background:#ff4d4d20;color:#ff4d4d}
-.tag-yellow{background:#ffc10720;color:#ffc107}
-.tag-blue{background:#4dabf720;color:#4dabf7}
-.tag-gray{background:#3a3f50;color:#8892b0}
-.live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#00d26a;margin-right:6px;animation:pulse 2s infinite}
-.live-dot.red{background:#ff4d4d;animation:none}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.section-title{font-size:18px;font-weight:600;margin:24px 0 12px;color:#fff}
-.note{color:#6b7394;font-size:13px;margin-top:16px}
-.config-table{font-size:13px}
-.config-table td{padding:6px 10px}
-.config-table tr:hover{background:#182038}
-.audit-log{max-height:200px;overflow-y:auto;background:#0d1229;border-radius:8px;padding:12px;font-family:monospace;font-size:12px;color:#8892b0;margin-top:12px}
-.audit-log div{padding:4px 0;border-bottom:1px solid #1a2340}
-.audit-log .ts{color:#4dabf7;margin-right:8px}
+th{background:#0d1229;color:#6b7394;font-size:11px;text-transform:uppercase;letter-spacing:.4px;padding:8px;text-align:left}
+td{padding:8px;border-bottom:1px solid #1a2340;font-size:13px}
+.tag{display:inline-block;padding:1px 6px;border-radius:3px;font-size:11px;font-weight:600}
+.tg{background:#00d26a20;color:#00d26a}
+.tr{background:#ff4d4d20;color:#ff4d4d}
+.tb{background:#4dabf720;color:#4dabf7}
+.ty{background:#ffc10720;color:#ffc107}
+.note{color:#6b7394;font-size:12px;margin-top:12px}
+.live{display:inline-block;width:7px;height:7px;border-radius:50%;background:#00d26a;margin-right:5px;animation:pu 2s infinite}
+.live.off{background:#ff4d4d;animation:none}
+@keyframes pu{0%,100%{opacity:1}50%{opacity:.4}}
+.logbox{background:#0d1229;border-radius:6px;padding:10px;font-family:monospace;font-size:11px;color:#8892b0;max-height:160px;overflow-y:auto;margin-top:8px}
+.logbox div{padding:3px 0;border-bottom:1px solid #1a2340}
 </style>
 </head>
 <body>
 <div class="container">
   <h1>Soros — Polymarket Monitor</h1>
-  <div class="subtitle">
-    <span class="live-dot red"></span>
-    <span id="status-text">Loading…</span>
-  </div>
+  <div class="subtitle"><span class="live off" id="dot"></span><span id="status">Loading…</span></div>
 
   <div class="grid" id="kpis"></div>
 
-  <div class="section-title">Current Run</div>
-  <div class="card" id="run-card" style="display:none">
-    <table class="config-table">
-      <tr><td style="color:#6b7394">Run ID</td><td id="run-id">—</td></tr>
-      <tr><td style="color:#6b7394">Status</td><td id="run-status">—</td></tr>
-      <tr><td style="color:#6b7394">Started</td><td id="run-started">—</td></tr>
-      <tr><td style="color:#6b7394">P&L</td><td id="run-pnl">—</td></tr>
-      <tr><td style="color:#6b7394">Orders / Fills</td><td id="run-trades">—</td></tr>
-    </table>
-  </div>
-  <div class="note" id="no-run" style="display:none">No active run</div>
-
-  <div class="section-title">Active Config</div>
-  <div class="table-card" id="config-card"></div>
-
-  <div class="section-title">Recent Runs</div>
-  <div class="table-card">
-    <table>
-      <thead><tr><th>ID</th><th>Status</th><th>Mode</th><th>P&L</th><th>Orders</th><th>Started</th></tr></thead>
-      <tbody id="runs-body"></tbody>
-    </table>
+  <div class="panel">
+    <h2>Current Run</h2>
+    <table><tbody id="run-body"></tbody></table>
+    <div id="no-run" style="display:none;color:#6b7394">No active run</div>
   </div>
 
-  <div class="section-title">Recent Trades</div>
-  <div class="table-card">
-    <table>
-      <thead><tr><th>ID</th><th>Asset</th><th>Side</th><th>Price</th><th>Size</th><th>Status</th><th>Time</th></tr></thead>
-      <tbody id="trades-body"></tbody>
-    </table>
+  <div class="panel">
+    <h2>Bot Live Status</h2>
+    <div class="logbox" id="bot-logs"></div>
   </div>
 
-  <div class="note">Last updated: <span id="ts">—</span>. Data from Command Center snapshot.</div>
+  <div class="panel">
+    <h2>Active Config</h2>
+    <table><tbody id="cfg-body"></tbody></table>
+  </div>
+
+  <div class="panel">
+    <h2>Recent Runs</h2>
+    <table><thead><tr><th>ID</th><th>Status</th><th>P&L</th><th>Orders</th><th>Fills</th><th>Started</th></tr></thead><tbody id="runs-body"></tbody></table>
+  </div>
+
+  <div class="panel">
+    <h2>Recent Trades</h2>
+    <table><thead><tr><th>ID</th><th>Asset</th><th>Side</th><th>Price</th><th>Size</th><th>Status</th><th>Time</th></tr></thead><tbody id="trades-body"></tbody></table>
+  </div>
+
+  <div class="note">Auto-refresh: 60s. Last: <span id="ts">—</span></div>
 </div>
 
 <script>
-// This page is static. The snapshot.json is deployed with the site.
-// To update: run the snapshot script locally and push to Vercel.
-// Future: poll /api/snapshot endpoint if the CC has a public URL.
+const $ = id => document.getElementById(id);
+const pnl = p => p >= 0 ? '+$'+p.toFixed(2) : '-$'+Math.abs(p).toFixed(2);
+const pnlC = p => p >= 0 ? 'green' : 'red';
+const tag = s => s === 'running' ? '<span class="tag tg">Running</span>' : s === 'stopped' ? '<span class="tag ty">Stopped</span>' : '<span class="tag tb">Completed</span>';
 
 async function load() {
   try {
     const r = await fetch('/snapshot.json', {cache:'no-cache'});
-    if (!r.ok) { setStatus('error','No snapshot data'); return; }
+    if (!r.ok) { setStatus('err','No data'); return; }
     const d = await r.json();
-    if (!d.ok) { setStatus('error','Snapshot invalid'); return; }
+    if (!d.ok) { setStatus('err','Invalid'); return; }
     render(d);
-  } catch(e) { setStatus('error','Failed to load'); }
+  } catch(e) { setStatus('err','Load failed: '+e.message); }
 }
 
-function setStatus(type, msg) {
-  const dot = document.querySelector('.live-dot');
-  dot.className = 'live-dot ' + (type==='ok' ? '' : 'red');
-  document.getElementById('status-text').textContent = msg;
-}
-
-function pnl(p) { return p >= 0 ? '+$'+p.toFixed(2) : '-$'+Math.abs(p).toFixed(2); }
-function pnlClass(p) { return p >= 0 ? 'green' : 'red'; }
-function tag(status) {
-  if (status === 'running') return '<span class="tag tag-green">Running</span>';
-  if (status === 'completed') return '<span class="tag tag-blue">Completed</span>';
-  if (status === 'stopped') return '<span class="tag tag-yellow">Stopped</span>';
-  return '<span class="tag tag-gray">'+status+'</span>';
+function setStatus(t,m) {
+  $('dot').className = 'live ' + (t==='ok' ? '' : 'off');
+  $('status').textContent = m;
 }
 
 function render(d) {
   setStatus('ok','Connected');
-  document.getElementById('ts').textContent = d.ts || '—';
+  $('ts').textContent = d.ts || '—';
 
-  // KPIs
   const run = d.current_run;
-  const totalPnl = run ? run.total_pnl : (d.totals ? d.totals.pnl_sum : 0);
-  const fills = run ? run.total_fills : (d.totals ? d.totals.fills_sum : 0);
-  const orders = run ? run.total_orders : (d.totals ? d.totals.orders_sum : 0);
+  const bot = d.bot || {};
+  const cfg = d.config || {};
+  const pnlVal = run ? run.total_pnl : 0;
+  const fills = run ? run.total_fills : 0;
+  const orders = run ? run.total_orders : 0;
 
-  document.getElementById('kpis').innerHTML = `
-    <div class="card"><h3>P&L</h3><div class="value ${pnlClass(totalPnl)}">${pnl(totalPnl)}</div></div>
-    <div class="card"><h3>Orders</h3><div class="value blue">${orders}</div></div>
-    <div class="card"><h3>Fills</h3><div class="value blue">${fills}</div></div>
-    <div class="card"><h3>Runs</h3><div class="value blue">${d.totals ? d.totals.run_count : 0}</div></div>
+  $('kpis').innerHTML = `
+    <div class="card"><h3>P&L</h3><div class="val ${pnlC(pnlVal)}">${pnl(pnlVal)}</div></div>
+    <div class="card"><h3>Orders</h3><div class="val blue">${orders}</div></div>
+    <div class="card"><h3>Fills</h3><div class="val blue">${fills}</div></div>
+    <div class="card"><h3>Runs</h3><div class="val blue">${d.totals ? d.totals.run_count : 0}</div></div>
+    <div class="card"><h3>Bot</h3><div class="val ${bot.alive ? 'green' : 'red'}">${bot.alive ? 'ALIVE' : 'DOWN'}</div></div>
+    <div class="card"><h3>Pause</h3><div class="val ${cfg.pauseOrders ? 'yellow' : 'green'}">${cfg.pauseOrders ? 'PAUSED' : 'ON'}</div></div>
   `;
 
-  // Current run
+  // Run
   if (run) {
-    document.getElementById('run-card').style.display = '';
-    document.getElementById('no-run').style.display = 'none';
-    document.getElementById('run-id').textContent = '#' + run.id;
-    document.getElementById('run-status').innerHTML = tag(run.status);
-    document.getElementById('run-started').textContent = run.started_at || '—';
-    document.getElementById('run-pnl').innerHTML = '<span class="'+pnlClass(run.total_pnl)+'">'+pnl(run.total_pnl)+'</span>';
-    document.getElementById('run-trades').textContent = run.total_orders + ' / ' + run.total_fills;
+    $('no-run').style.display = 'none';
+    $('run-body').innerHTML = `
+      <tr><td style="color:#6b7394">ID</td><td>#${run.id}</td></tr>
+      <tr><td style="color:#6b7394">Status</td><td>${tag(run.status)}</td></tr>
+      <tr><td style="color:#6b7394">Mode</td><td>${run.mode}</td></tr>
+      <tr><td style="color:#6b7394">Started</td><td>${run.started_at || '—'}</td></tr>
+      <tr><td style="color:#6b7394">P&L</td><td><span class="${pnlC(run.total_pnl)}">${pnl(run.total_pnl)}</span></td></tr>
+      <tr><td style="color:#6b7394">Orders / Fills</td><td>${run.total_orders} / ${run.total_fills}</td></tr>
+      <tr><td style="color:#6b7394">Cycles</td><td>${run.total_cycles}</td></tr>
+    `;
   } else {
-    document.getElementById('run-card').style.display = 'none';
-    document.getElementById('no-run').style.display = '';
+    $('run-body').innerHTML = '';
+    $('no-run').style.display = '';
   }
+
+  // Bot logs
+  const logs = [];
+  if (bot.pnl_line) logs.push('📊 ' + bot.pnl_line.replace(/^\d+:\d+:\d+\s*\[INFO\]\s*/,''));
+  if (bot.cycle_line) logs.push('⏱️ ' + bot.cycle_line.replace(/^\d+:\d+:\d+\s*\[INFO\]\s*/,''));
+  if (bot.last_fill) logs.push('✅ ' + bot.last_fill.replace(/^\d+:\d+:\d+\s*\[INFO\]\s*/,''));
+  if (bot.last_merge) logs.push('🔀 ' + bot.last_merge.replace(/^\d+:\d+:\d+\s*\[INFO\]\s*/,''));
+  if (bot.last_claim) logs.push('💰 ' + bot.last_claim.replace(/^\d+:\d+:\d+\s*\[INFO\]\s*/,''));
+  if (bot.last_error) logs.push('❌ ' + bot.last_error.replace(/^\d+:\d+:\d+\s*\[ERROR\]\s*/,''));
+  if (bot.loss_state) logs.push('⚠️ ' + bot.loss_state.replace(/^\d+:\d+:\d+\s*\[WARNING\]\s*/,''));
+  $('bot-logs').innerHTML = logs.length ? logs.map(l => '<div>'+l+'</div>').join('') : '<div style="color:#6b7394">No live data yet</div>';
 
   // Config
-  const cfg = d.config || {};
-  let html = '<table class="config-table">';
+  let ch = '';
   for (const [k,v] of Object.entries(cfg).sort()) {
     if (k === 'notes') continue;
-    html += '<tr><td style="color:#6b7394;width:200px">'+k+'</td><td>'+JSON.stringify(v)+'</td></tr>';
+    ch += `<tr><td style="color:#6b7394;width:180px">${k}</td><td>${JSON.stringify(v)}</td></tr>`;
   }
-  html += '</table>';
-  if (cfg.notes) html += '<div class="note" style="margin-top:8px">📝 '+cfg.notes+'</div>';
-  document.getElementById('config-card').innerHTML = html;
+  if (cfg.notes) ch += `<tr><td style="color:#6b7394">Notes</td><td>${cfg.notes}</td></tr>`;
+  $('cfg-body').innerHTML = ch;
 
-  // Recent runs
-  const runs = d.recent_runs || d.runs || [];
-  let rhtml = '';
-  for (const r of runs.slice(0,10)) {
-    rhtml += '<tr><td>#'+r.id+'</td><td>'+tag(r.status)+'</td><td>'+r.mode+'</td><td class="'+pnlClass(r.total_pnl)+'">'+pnl(r.total_pnl)+'</td><td>'+r.total_orders+'/'+r.total_fills+'</td><td>'+(r.started_at||'').slice(5,16)+'</td></tr>';
+  // Runs
+  let rh = '';
+  for (const r of (d.recent_runs || []).slice(0,10)) {
+    rh += `<tr><td>#${r.id}</td><td>${tag(r.status)}</td><td class="${pnlC(r.total_pnl)}">${pnl(r.total_pnl)}</td><td>${r.total_orders}</td><td>${r.total_fills}</td><td>${(r.started_at||'').slice(5,16)}</td></tr>`;
   }
-  document.getElementById('runs-body').innerHTML = rhtml || '<tr><td colspan="6" style="color:#6b7394">No runs yet</td></tr>';
+  $('runs-body').innerHTML = rh || '<tr><td colspan="6" style="color:#6b7394">No runs</td></tr>';
 
-  // Recent trades
-  const trades = d.recent_trades || [];
-  let thtml = '';
-  for (const t of trades.slice(0,10)) {
-    const side = t.side === 'buy' ? '<span class="tag tag-green">BUY</span>' : '<span class="tag tag-red">SELL</span>';
-    thtml += '<tr><td>'+t.id+'</td><td>'+t.asset+'</td><td>'+side+'</td><td>$'+(t.price||0).toFixed(2)+'</td><td>'+(t.size||0).toFixed(1)+'</td><td>'+(t.status||'—')+'</td><td>'+(t.created_at||'').slice(5,16)+'</td></tr>';
+  // Trades
+  let th = '';
+  for (const t of (d.recent_trades || []).slice(0,10)) {
+    const s = t.side === 'buy' ? '<span class="tag tg">BUY</span>' : '<span class="tag tr">SELL</span>';
+    th += `<tr><td>${t.id}</td><td>${t.asset}</td><td>${s}</td><td>$${(t.price||0).toFixed(2)}</td><td>${(t.size||0).toFixed(1)}</td><td>${t.status||'—'}</td><td>${(t.created_at||'').slice(5,16)}</td></tr>`;
   }
-  document.getElementById('trades-body').innerHTML = thtml || '<tr><td colspan="7" style="color:#6b7394">No trades yet</td></tr>';
+  $('trades-body').innerHTML = th || '<tr><td colspan="7" style="color:#6b7394">No trades</td></tr>';
 }
 
 load();
-// Auto-refresh every 60s
 setInterval(load, 60000);
 </script>
 </body>
