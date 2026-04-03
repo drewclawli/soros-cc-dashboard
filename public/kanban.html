@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Soros — Kanban Live Monitor</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0b1020;color:#e8ecf3;min-height:100vh;overflow-x:auto}
+.header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 8px;max-width:1600px;margin:0 auto}
+.header h1{font-size:20px}.header .sub{color:#6b7394;font-size:11px}
+.live{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px}
+.live.on{background:#00d26a;animation:pu 2s infinite}.live.off{background:#ff4d4d}
+@keyframes pu{0%,100%{opacity:1}50%{opacity:.4}}
+.topbar{display:flex;gap:10px;padding:0 20px 12px;max-width:1600px;margin:0 auto;flex-wrap:wrap}
+.topbar .k{background:#121936;border:1px solid #243057;border-radius:8px;padding:8px 14px;min-width:100px}
+.topbar .k h3{font-size:9px;color:#6b7394;text-transform:uppercase;letter-spacing:.4px}
+.topbar .k .v{font-size:18px;font-weight:700}
+.gn{color:#00d26a}.rd{color:#ff4d4d}.bl{color:#4dabf7}.yl{color:#ffc107}.pr{color:#a78bfa}.or{color:#fb923c}
+.kanban{display:flex;gap:10px;padding:0 20px 20px;max-width:1600px;margin:0 auto;min-height:500px}
+.col{background:#121936;border:1px solid #243057;border-radius:10px;flex:1;min-width:180px;max-width:260px;display:flex;flex-direction:column}
+.col-header{padding:10px 12px;border-bottom:1px solid #1a2340;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;display:flex;justify-content:space-between;align-items:center}
+.col-header .count{background:#1a2340;border-radius:10px;padding:2px 8px;font-size:10px;color:#6b7394}
+.col-body{padding:6px;flex:1;overflow-y:auto;max-height:70vh}
+.card{background:#0d1229;border:1px solid #1a2340;border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:11px;transition:border-color .2s}
+.card:hover{border-color:#4dabf7}
+.card .asset{font-weight:700;font-size:12px}.card .wid{color:#6b7394;font-size:10px}
+.card .row{display:flex;justify-content:space-between;margin-top:3px}
+.card .label{color:#6b7394}.card .val{font-weight:600}
+.card .tag{display:inline-block;padding:1px 6px;border-radius:3px;font-size:9px;font-weight:600;margin-top:4px}
+.tgw{background:#ffc10720;color:#ffc107}.tgb{background:#4dabf720;color:#4dabf7}.tgg{background:#00d26a20;color:#00d26a}.tgr{background:#ff4d4d20;color:#ff4d4d}.tgp{background:#a78bfa20;color:#a78bfa}.tgo{background:#fb923c20;color:#fb923c}
+.card.orphan-t1{border-left:3px solid #ffc107}
+.card.orphan-t2{border-left:3px solid #fb923c}
+.card.orphan-t3{border-left:3px solid #ff4d4d}
+.card.orphan-t4{border-left:3px solid #991b1b}
+.card.paired{border-left:3px solid #00d26a}
+.card.ordered{border-left:3px solid #4dabf7}
+.card.watched{border-left:3px solid #6b7394}
+.card.filtered{border-left:3px solid #a78bfa}
+.card.resolved-merge{border-left:3px solid #00d26a;background:#00d26a08}
+.card.resolved-sell{border-left:3px solid #4dabf7;background:#4dabf708}
+.card.resolved-lost{border-left:3px solid #ff4d4d;background:#ff4d4d08}
+.col-footer{padding:6px 10px;border-top:1px solid #1a2340;font-size:10px;color:#6b7394;text-align:center}
+.n{color:#6b7394;font-size:10px;padding:8px 20px;text-align:center}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>Soros — Live Market Monitor</h1>
+    <div class="sub"><span class="live off" id="dot"></span><span id="st">Loading…</span> · <span id="ts">—</span></div>
+  </div>
+</div>
+
+<div class="topbar" id="kpis"></div>
+
+<div class="kanban">
+  <div class="col" id="col-watched">
+    <div class="col-header">📡 Watched <span class="count" id="cnt-watched">0</span></div>
+    <div class="col-body" id="body-watched"></div>
+    <div class="col-footer">Markets in scan</div>
+  </div>
+  <div class="col" id="col-filtered">
+    <div class="col-header">🔍 Filtered <span class="count" id="cnt-filtered">0</span></div>
+    <div class="col-body" id="body-filtered"></div>
+    <div class="col-footer">Passed edge/gate</div>
+  </div>
+  <div class="col" id="col-ordered">
+    <div class="col-header">📝 Ordered <span class="count" id="cnt-ordered">0</span></div>
+    <div class="col-body" id="body-ordered"></div>
+    <div class="col-footer">Placed on book</div>
+  </div>
+  <div class="col" id="col-orphan">
+    <div class="col-header">⚠️ Orphans <span class="count" id="cnt-orphan">0</span></div>
+    <div class="col-body" id="body-orphan"></div>
+    <div class="col-footer">One side filled</div>
+  </div>
+  <div class="col" id="col-paired">
+    <div class="col-header">🔗 Paired <span class="count" id="cnt-paired">0</span></div>
+    <div class="col-body" id="body-paired"></div>
+    <div class="col-footer">Both sides filled</div>
+  </div>
+  <div class="col" id="col-resolved">
+    <div class="col-header">✅ Resolved <span class="count" id="cnt-resolved">0</span></div>
+    <div class="col-body" id="body-resolved"></div>
+    <div class="col-footer">Merged / Claimed / Lost</div>
+  </div>
+</div>
+
+<div class="n">Auto-refresh 30s. Last: <span id="ts2">—</span></div>
+
+<script>
+const $=id=>document.getElementById(id);
+function setDot(ok){$('dot').className='live '+(ok?'on':'off')}
+
+async function load(){
+  try{
+    const r=await fetch('/api/snapshot',{cache:'no-cache'});
+    if(!r.ok){setDot(false);$('st').textContent='No data';return}
+    const d=await r.json();
+    if(!d.ok){setDot(false);$('st').textContent='Invalid';return}
+    render(d);
+  }catch(e){setDot(false);$('st').textContent='Error: '+e.message}
+}
+
+function card(asset,wid,extra,cls){
+  return `<div class="card ${cls||''}"><div class="asset">${asset}</div><div class="wid">${wid}</div>${extra}</div>`
+}
+
+function render(d){
+  setDot(true);$('st').textContent='Connected';
+  const ts=d.ts||'';$('ts').textContent=ts;$('ts2').textContent=ts;
+  const run=d.current_run||{};const bot=d.bot||{};const cfg=d.config||{};
+
+  // KPIs
+  $('kpis').innerHTML=`
+    <div class="k"><h3>Wallet</h3><div class="v bl">$${(run.wallet_balance||0).toFixed(0)}</div></div>
+    <div class="k"><h3>P&L</h3><div class="v ${(run.total_pnl||0)>=0?'gn':'rd'}">${(run.total_pnl||0)>=0?'+':''}$${(run.total_pnl||0).toFixed(2)}</div></div>
+    <div class="k"><h3>Orders</h3><div class="v bl">${run.total_orders||0}</div></div>
+    <div class="k"><h3>Fills</h3><div class="v bl">${run.total_fills||0}</div></div>
+    <div class="k"><h3>Exposure</h3><div class="v or">$${(run.total_exposure||0).toFixed(0)}</div></div>
+    <div class="k"><h3>Status</h3><div class="v ${bot.alive?'gn':'rd'}">${bot.alive?'LIVE':'DOWN'}</div></div>
+  `;
+
+  // Parse active windows from bot events and snapshot
+  const activeWindows={};
+  const events=bot.events||[];
+  
+  // Build window state from snapshot data
+  const wevts=bot.recent_window_events||[];
+  const pm=bot.pair_metrics||{};
+  const hm=bot.hedge_metrics||{};
+  const mm=bot.merge_metrics||{};
+
+  // Gather window info from edge map / cycle data
+  // Parse active order windows from bot cycle line
+  const cycleLine=bot.cycle_line||'';
+  const ordMatch=cycleLine.match(/Ord:(\d+)/);
+  const expMatch=cycleLine.match(/Exp:\$(\d+)/);
+  const activeOrdCount=ordMatch?parseInt(ordMatch[1]):0;
+  const activeExp=expMatch?parseInt(expMatch[1]):0;
+
+  // Generate kanban columns from available data
+  // Watched: total discovered (from edge map)
+  let watched=0,tradeable=0;
+  for(const l of events){
+    const m=l.match(/(\d+) discovered/);
+    if(m) watched=parseInt(m[1]);
+    const t=l.match(/(\d+) tradeable/);
+    if(t) tradeable=parseInt(t[1]);
+  }
+
+  // Build cards from window events
+  const watchedCards=[];const filteredCards=[];const orderedCards=[];
+  const orphanCards=[];const pairedCards=[];const resolvedCards=[];
+
+  // Parse from edge map entries in events
+  for(const l of events){
+    const em=l.match(/\*\*\*\s+([\w-]+)\s+\|\s+(\d+)s\s+\|/);
+    if(em){
+      const wid=em[1];const secs=parseInt(em[2]);
+      const asset=wid.split('-')[0].toUpperCase();
+      const tf=wid.split('-')[1]||'';
+      watchedCards.push(card(asset,wid,
+        `<div class="row"><span class="label">Time</span><span class="val">${secs}s</span></div>`,
+        'watched'));
+    }
+  }
+
+  // Parse ordered windows from cycle logs
+  for(const l of events){
+    const pm2=l.match(/PAIR OK \|\s+([\w-]+)\s+\|.*UP:([0-9.]+)\s*\+\s*DN:([0-9.]+)\s*=\s*([0-9.]+)\s*\|.*Profit:\s*\$([0-9.]+)/);
+    if(pm2){
+      const wid=pm2[1];const asset=wid.split('-')[0].toUpperCase();
+      const edge=((1-parseFloat(pm2[4]))*100).toFixed(1);
+      filteredCards.push(card(asset,wid,
+        `<div class="row"><span class="label">Edge</span><span class="val gn">${edge}%</span></div>`+
+        `<div class="row"><span class="label">UP</span><span class="val">$${pm2[2]}</span></div>`+
+        `<div class="row"><span class="label">DN</span><span class="val">$${pm2[3]}</span></div>`,
+        'filtered'));
+    }
+  }
+
+  // Parse placed orders
+  for(const l of events){
+    const bm=l.match(/\[MM\s+\]\s+MM-L0\w*\s+(BUY|SELL)\s+([0-9.]+)\s+@\s+\$([0-9.]+)\s*=\s*\$\s*([0-9.]+)\s*\|\s*(0x\w+)/);
+    if(bm){
+      const side=bm[1];const shares=bm[2];const price=bm[3];const cost=bm[4];const oid=bm[5].slice(0,10);
+      // Try to find matching window from recent PAIR OK
+      const pairLine=events.find(e=>e.includes('PAIR OK')&&e.includes(oid.slice(0,8)));
+      const wid=pairLine?pairLine.match(/PAIR OK \|\s+([\w-]+)/)?.[1]||'?':'?';
+      const asset=wid.split('-')[0].toUpperCase()||'?';
+      orderedCards.push(card(asset,wid,
+        `<div class="row"><span class="label">${side}</span><span class="val">${shares} @ $${price}</span></div>`+
+        `<div class="row"><span class="label">Cost</span><span class="val">$${cost}</span></div>`+
+        `<div class="tag tgb">${side}</div>`,
+        'ordered'));
+    }
+  }
+
+  // Parse orphans (one-side filled, hedge pending)
+  for(const l of events){
+    const fm=l.match(/FILL \[(\w+)\]\s*\|\s*(\w+)\s+([\w]+)\s+([0-9.]+)\s+@\s+\$([0-9.]+)\s*\|\s*([\w-]+)/);
+    if(fm){
+      const source=fm[1];const side=fm[2];const token=fm[3];const shares=fm[4];const price=fm[5];const wid=fm[6];
+      const asset=wid.split('-')[0].toUpperCase()||'?';
+      // Check if this is an orphan (one side only)
+      const hasPair=events.some(e=>e.includes('PAIR COMPLETE')&&e.includes(wid));
+      if(!hasPair){
+        // Find hedge tier
+        const hedgeEvents=events.filter(e=>e.includes('HEDGE')&&e.includes(wid));
+        let tier=0;let tierLabel='Waiting';let tierClass='tgb';
+        for(const he of hedgeEvents){
+          const tm=he.match(/HEDGE WAIT T(\d)/);
+          if(tm){tier=Math.max(tier,parseInt(tm[1]))}
+          if(he.includes('HEDGE COMPLETE')){tierLabel='Hedged';tierClass='tgg'}
+        }
+        if(tier>0){tierLabel=`T${tier}`;tierClass=['','tgw','tgo','tgr','tgr'][tier]||'tgw'}
+        orphanCards.push(card(asset,wid,
+          `<div class="row"><span class="label">${side}</span><span class="val">${shares} @ $${price}</span></div>`+
+          `<div class="row"><span class="label">Source</span><span class="val">${source}</span></div>`+
+          `<div class="tag ${tierClass}">${tierLabel}</div>`,
+          `orphan-t${tier||1}`));
+      }
+    }
+  }
+
+  // Parse paired windows
+  for(const l of events){
+    if(l.includes('PAIR COMPLETE')){
+      const wm=l.match(/PAIR COMPLETE.*\|\s*([\w-]+)/);
+      if(wm){
+        const wid=wm[1];const asset=wid.split('-')[0].toUpperCase();
+        pairedCards.push(card(asset,wid,
+          `<div class="row"><span class="label">Status</span><span class="val gn">Paired</span></div>`+
+          `<div class="tag tgg">Complete</div>`,
+          'paired'));
+      }
+    }
+  }
+
+  // Parse resolved (merged/claimed)
+  for(const l of events){
+    if(l.includes('MERGED OK')){
+      const mm2=l.match(/MERGED OK \|\s*([\w-]+)\s*\|\s*([0-9.]+)\s*shares/);
+      if(mm2){
+        const wid=mm2[1];const asset=wid.split('-')[0].toUpperCase();
+        resolvedCards.push(card(asset,wid,
+          `<div class="row"><span class="label">Type</span><span class="val gn">Merged</span></div>`+
+          `<div class="row"><span class="label">Shares</span><span class="val">${mm2[2]}</span></div>`+
+          `<div class="tag tgg">Merged</div>`,
+          'resolved-merge'));
+      }
+    }
+    if(l.includes('CLAIMED')){
+      const cm=l.match(/CLAIMED \|\s*([\w-]+)\s*\|\s*([\w-]+)\s*\|\s*Est:\s*\$([0-9.]+)/);
+      if(cm){
+        const wid=cm[1];const asset=wid.split('-')[0].toUpperCase();
+        resolvedCards.push(card(asset,wid,
+          `<div class="row"><span class="label">Type</span><span class="val bl">Claimed</span></div>`+
+          `<div class="row"><span class="label">Method</span><span class="val">${cm[2]}</span></div>`+
+          `<div class="row"><span class="label">Value</span><span class="val">$${cm[3]}</span></div>`+
+          `<div class="tag tgb">Claimed</div>`,
+          'resolved-sell'));
+      }
+    }
+    if(l.includes('ORPHAN CANCEL')){
+      const om=l.match(/ORPHAN CANCEL \|\s*([\w-]+)/);
+      if(om){
+        const wid=om[1];const asset=wid.split('-')[0].toUpperCase();
+        resolvedCards.push(card(asset,wid,
+          `<div class="row"><span class="label">Type</span><span class="val rd">Lost</span></div>`+
+          `<div class="tag tgr">Orphan</div>`,
+          'resolved-lost'));
+      }
+    }
+  }
+
+  // Render columns
+  $('cnt-watched').textContent=watchedCards.length||watched;
+  $('body-watched').innerHTML=watchedCards.length?watchedCards.slice(0,15).join(''):'<div style="color:#6b7394;font-size:11px;padding:8px">No active windows</div>';
+  
+  $('cnt-filtered').textContent=filteredCards.length;
+  $('body-filtered').innerHTML=filteredCards.length?filteredCards.slice(0,10).join(''):'<div style="color:#6b7394;font-size:11px;padding:8px">No filtered markets</div>';
+
+  $('cnt-ordered').textContent=orderedCards.length;
+  $('body-ordered').innerHTML=orderedCards.length?orderedCards.slice(0,10).join(''):'<div style="color:#6b7394;font-size:11px;padding:8px">No active orders</div>';
+
+  $('cnt-orphan').textContent=orphanCards.length;
+  $('body-orphan').innerHTML=orphanCards.length?orphanCards.slice(0,10).join(''):'<div style="color:#6b7394;font-size:11px;padding:8px">No orphans</div>';
+
+  $('cnt-paired').textContent=pairedCards.length;
+  $('body-paired').innerHTML=pairedCards.length?pairedCards.slice(0,10).join(''):'<div style="color:#6b7394;font-size:11px;padding:8px">No paired windows</div>';
+
+  $('cnt-resolved').textContent=resolvedCards.length;
+  $('body-resolved').innerHTML=resolvedCards.length?resolvedCards.slice(0,10).join(''):'<div style="color:#6b7394;font-size:11px;padding:8px">No resolved yet</div>';
+}
+
+load();
+setInterval(load,30000);
+</script>
+</body>
+</html>
